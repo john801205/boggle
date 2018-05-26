@@ -1,5 +1,6 @@
 import flask
 import itertools
+import os
 import random
 import string
 
@@ -8,7 +9,8 @@ from . import trie
 bp = flask.Blueprint('board', __name__, url_prefix='/boggle')
 
 dictionary = trie.Trie()
-with open('dictionary.txt', 'r') as f:
+dictpath = os.path.join(os.path.dirname(__file__), 'dictionary.txt')
+with open(dictpath, 'r') as f:
     for word in f:
         dictionary.insert(word.strip())
 
