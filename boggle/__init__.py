@@ -3,8 +3,11 @@ import os
 
 from . import board, trie
 
-def create_app():
+def create_app(config=None):
     app = flask.Flask(__name__)
+
+    if config is not None:
+        app.config.from_mapping(config)
 
     try:
         os.makedirs(app.instance_path)
@@ -12,9 +15,5 @@ def create_app():
         pass
 
     app.register_blueprint(board.bp)
-
-    @app.route('/hello/')
-    def hello():
-        return 'Hello, world!\n'
 
     return app
