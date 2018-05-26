@@ -1,3 +1,4 @@
+import itertools
 import string
 
 class TrieNode:
@@ -40,46 +41,39 @@ class Trie:
         current.count += 1
         current.word = True
 
-    def answers(self, board):
-        result = set()
-
+    def lookup(self, board, word):
         for i in range(len(board)):
             for j in range(len(board[i])):
-                stack = ''
-                Trie.query(self.root, board, i, j, stack, result)
+                if Trie.__lookup(self.root, board, i, j, word, 0):
+                    return True
 
-        return result
+        return False
 
     @staticmethod
-    def query(root, board, row, col, stack, result):
-        if (row < 0 or row >= 4 or
-            col < 0 or col >= 4 or
-            board[row][col] == None or
-            root == None or
-            root.count == 0):
-            return 0
+    def __lookup(root, board, row, col, word, index):
+        if index >= len(word):
+            return root != None and root.word
 
-        count = 0
-        if root.word:
-            count += 1
-            root.word = False
-            result.add(stack)
+        if (root == None or
+            row < 0 or row >= len(board) or
+            col < 0 or col >= len(board[row]) or
+            (board[row][col] != '*' and board[row][col] != word[index])):
+            return False
 
         orig = board[row][col]
         board[row][col] = None
 
-        possibilities = orig if orig != '*' else string.ascii_lowercase
+        possibles = orig if orig != '*' else string.ascii_lowercase
 
-        for possible in possibilities:
-            new_stack = stack + possible
-            index = ord(possible) - ord('a')
+        for char in possibles:
+            current = root.node[ord(char) - ord('a')]
 
-            for i in range(-1, 2):
-                for j in range(-1, 2):
-                    count += Trie.query(root.node[index], board, row+i, col+j, new_stack, result)
+            for i, j in itertools.product(range(-1, 2), repeat=2):
+                if Trie.__lookup(current, board, row+i, col+j, word, index+1):
+                    board[row][col] = orig
+                    return True
 
         board[row][col] = orig
-        root.count -= count;
+        return False
 
-        return count;
 

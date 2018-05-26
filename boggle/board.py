@@ -6,49 +6,56 @@ import string
 from . import trie
 
 bp = flask.Blueprint('board', __name__, url_prefix='/boggle')
-dictionary = trie.Trie()
 
+dictionary = trie.Trie()
 with open('dictionary2.txt', 'r') as f:
     for word in f:
-        word = word.strip()
-        dictionary.insert(word)
+        dictionary.insert(word.strip())
 
 @bp.route('/')
 def index():
-    flask.session['board'] = [[1,2,3],[2,3,4]]
-    return flask.redirect(flask.url_for('board.random_board'))
+    board = flask.session.get('board', None)
+
+    if board == None:
+        board = [[random.choice(string.ascii_lowercase+'*') for j in range(cols)] for i in range(rows)]
+        flask.session['board'] = board
+
+    return '<br>'.join(' '.join(row) for row in board)
 
 @bp.route('/random')
 def random_board():
     rows = 4
     cols = 4
-    board = [[random.choice(string.ascii_lowercase+'*') for j in range(cols)] for i in range(rows)]
 
-    flask.session['rows'] = rows
-    flask.session['cols'] = cols
+    board = [[random.choice(string.ascii_lowercase+'*') for j in range(cols)] for i in range(rows)]
     flask.session['board'] = board
 
-    result = {'rows': rows, 'cols': cols, 'board': board}
-    return flask.jsonify(result)
+    return flask.jsonify({'board': board})
 
 @bp.route('/shuffle')
 def shuffle():
-    rows = flask.session.get('rows', None)
-    cols = flask.session.get('cols', None)
     board = flask.session.get('board', None)
 
-    if rows == None or cols == None or board == None:
-        flask.abort(401)
+    if board == None:
+        flask.abort(400)
 
-    board = itertools.chain_fromiterable(board)
+    rows = len(board)
+    cols = len(board[0])
+
+    board = list(itertools.chain.from_iterable(board))
     random.shuffle(board)
     board = [[board[i*cols+j] for j in range(cols)] for i in range(rows)]
 
     flask.session['board'] = board
 
-    result = {'rows': rows, 'cols': cols, 'board': board}
-    return flask.jsonify(result)
+    return flask.jsonify({'board': board})
 
-@bp.route('/lookup/<string:board>')
+@bp.route('/lookup/<string:word>')
 def lookup(word):
-    pass
+    board = flask.session.get('board', None)
+
+    if board == None:
+        flask.abort(400)
+
+    result = {'status': dictionary.lookup(board, word)}
+    return flask.jsonify(result)
