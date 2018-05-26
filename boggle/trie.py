@@ -42,6 +42,11 @@ class Trie:
         current.word = True
 
     def lookup(self, board, word):
+        word = word.lower()
+        for char in word:
+            if char not in string.ascii_lowercase:
+                return False
+
         for i in range(len(board)):
             for j in range(len(board[i])):
                 if Trie.__lookup(self.root, board, i, j, word, 0):

@@ -7,15 +7,15 @@
   </head>
   <body>
     <div class="container mt-2 d-flex justify-content-between">
-      <button type="button" class="btn btn-outline-secondary">
+      <a href="{{ url_for('board.new') }}" class="btn btn-outline-secondary">
         New Game
-      </button>
-      <button type="button" class="btn btn-outline-secondary">
+      </a>
+      <a href="{{ url_for('board.shuffle') }}" id="shuffle" class="btn btn-outline-secondary">
         Shuffle
-      </button>
+      </a>
     </div>
 
-    <div class="container mt-2 mb-2">
+    <div id="board" class="container mt-2 mb-2">
       {% for row in board %}
       <div class="row">
         {% for value in row %}
@@ -28,10 +28,10 @@
     </div>
 
     <div class="container justify-content-between">
-      <form class="form">
+      <form id="lookup" class="form" action="{{ url_for('board.lookup') }}">
         <div class="form-row">
           <div class="col-9 col-sm-11">
-            <input type="text" class="form-control" placeholder="Found word">
+            <input type="text" id="lookup_word" class="form-control" name="word" required="required" pattern="[A-Za-z]+" placeholder="Found word [A-Za-z]+">
           </div>
           <div class="col-3 col-sm-1">
             <button type="submit" class="btn btn-secondary">
@@ -44,10 +44,57 @@
 
     <hr>
 
-    <div class="container mt-2 font-weight-bold">
-      <span class="text-success">success</span>
-      <span class="text-danger">fail</span>
+    <div id="result" class="container mt-2 font-weight-bold">
     </div>
 
+    <script type="text/javascript">
+      $("#shuffle").click(function(event) {
+        $.ajax({
+          url: $(this).attr("href"),
+          success: function(response) {
+            var board = response["board"];
+            var html = "";
+
+            for (var i = 0; i < board.length; i++) {
+              html += "<div class=\"row\">";
+              for (var j = 0; j < board[i].length; j++) {
+                html += "<div class=\"col-3 rounded border border-white bg-dark display-4 text-center text-white\">";
+                html += board[i][j].toUpperCase();
+                html += "</div>";
+              }
+              html += "</div>";
+            }
+
+            $("#board").html(html);
+          }
+        });
+
+        event.preventDefault();
+      });
+
+      $("#lookup").submit(function(event) {
+        var word = $("#lookup_word").val();
+
+        $.ajax({
+          type: $(this).attr("method"),
+          url: $(this).attr("action"),
+          data: $(this).serialize(),
+          success: function(response) {
+            var valid = response["status"];
+            var html = "";
+
+            if (valid) {
+              html += "<span class=\"text-success\">" + word.toLowerCase() + "</span>\n";
+            } else {
+              html += "<span class=\"text-danger\">" + word.toLowerCase() + "</span>\n";
+            }
+
+            $("#result").prepend(html);
+          }
+        });
+
+        event.preventDefault();
+      });
+    </script>
   </body>
 </html>

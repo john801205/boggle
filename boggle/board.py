@@ -25,15 +25,15 @@ def index():
 
     return flask.render_template('index.html', board=board)
 
-@bp.route('/random')
-def random_board():
+@bp.route('/new')
+def new():
     rows = 4
     cols = 4
 
     board = [[random.choice(string.ascii_lowercase+'*') for j in range(cols)] for i in range(rows)]
     flask.session['board'] = board
 
-    return flask.jsonify({'board': board})
+    return flask.redirect(flask.url_for('board.index'))
 
 @bp.route('/shuffle')
 def shuffle():
@@ -53,11 +53,12 @@ def shuffle():
 
     return flask.jsonify({'board': board})
 
-@bp.route('/lookup/<string:word>')
-def lookup(word):
+@bp.route('/lookup')
+def lookup():
     board = flask.session.get('board', None)
+    word = flask.request.args.get('word', None)
 
-    if board == None:
+    if board == None or word == None:
         flask.abort(400)
 
     result = {'status': dictionary.lookup(board, word)}
