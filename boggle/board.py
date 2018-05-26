@@ -23,7 +23,7 @@ def index():
         board = [[random.choice(string.ascii_lowercase+'*') for j in range(cols)] for i in range(rows)]
         flask.session['board'] = board
 
-    return '<br>'.join(' '.join(row) for row in board)
+    return flask.render_template('index.html', board=board)
 
 @bp.route('/random')
 def random_board():

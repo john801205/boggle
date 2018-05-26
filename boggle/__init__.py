@@ -1,7 +1,7 @@
 import flask
 import os
 
-from . import board, trie
+from . import board
 
 def create_app(config=None):
     app = flask.Flask(__name__)
