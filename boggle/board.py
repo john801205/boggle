@@ -8,7 +8,7 @@ from . import trie
 bp = flask.Blueprint('board', __name__, url_prefix='/boggle')
 
 dictionary = trie.Trie()
-with open('dictionary2.txt', 'r') as f:
+with open('dictionary.txt', 'r') as f:
     for word in f:
         dictionary.insert(word.strip())
 
@@ -17,6 +17,7 @@ def index():
     board = flask.session.get('board', None)
 
     if board == None:
+        rows, cols = 4, 4
         board = [[random.choice(string.ascii_lowercase+'*') for j in range(cols)] for i in range(rows)]
         flask.session['board'] = board
 
