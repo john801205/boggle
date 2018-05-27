@@ -6,7 +6,7 @@ import string
 
 from . import trie
 
-bp = flask.Blueprint('board', __name__, url_prefix='/boggle')
+bp = flask.Blueprint('board', __name__)
 
 dictionary = trie.Trie()
 dictpath = os.path.join(os.path.dirname(__file__), 'dictionary.txt')
